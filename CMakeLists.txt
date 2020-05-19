@@ -9,6 +9,9 @@ project(playback)
 
 find_package(PCL 1.2 REQUIRED)
 
+# Including custom cmake rules
+include(cmake/clang-cxx-dev-tools.cmake)
+
 include_directories(${PCL_INCLUDE_DIRS})
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
