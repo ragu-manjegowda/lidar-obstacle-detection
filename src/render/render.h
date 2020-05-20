@@ -41,10 +41,10 @@ struct Car {
 
     Car(Vect3 setPosition, Vect3 setDimensions, Color setColor,
         std::string setName)
-        : position(setPosition),
-          dimensions(setDimensions),
-          color(setColor),
-          name(setName) {}
+        : position(setPosition)
+        , dimensions(setDimensions)
+        , color(setColor)
+        , name(setName) {}
 
     void render(pcl::visualization::PCLVisualizer::Ptr& viewer) {
         // render bottom of car

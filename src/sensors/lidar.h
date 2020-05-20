@@ -26,13 +26,13 @@ struct Ray {
 
     Ray(Vect3 setOrigin, double horizontalAngle, double verticalAngle,
         double setResolution)
-        : origin(setOrigin),
-          resolution(setResolution),
-          direction(resolution * cos(verticalAngle) * cos(horizontalAngle),
+        : origin(setOrigin)
+        , resolution(setResolution)
+        , direction(resolution * cos(verticalAngle) * cos(horizontalAngle),
                     resolution * cos(verticalAngle) * sin(horizontalAngle),
-                    resolution * sin(verticalAngle)),
-          castPosition(origin),
-          castDistance(0) {}
+                    resolution * sin(verticalAngle))
+        , castPosition(origin)
+        , castDistance(0) {}
 
     void rayCast(const std::vector<Car>& cars, double minDistance,
                  double maxDistance, pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,
