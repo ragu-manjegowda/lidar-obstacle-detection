@@ -1,3 +1,5 @@
+/* \author Ragu Manjegowda */
+/* \adopted from Aaron Brown */
 // PCL lib Functions for processing point clouds
 
 #include "processPointClouds.h"
@@ -42,12 +44,28 @@ std::pair<typename pcl::PointCloud<PointT>::Ptr,
     ProcessPointClouds<PointT>::SeparateClouds(
         pcl::PointIndices::Ptr inliers,
         typename pcl::PointCloud<PointT>::Ptr cloud) {
-    // TODO: Create two new point clouds, one cloud with obstacles and other
+    // Done: Create two new point clouds, one cloud with obstacles and other
     // with segmented plane
+    auto obstacleCloud = new pcl::PointCloud<PointT>();
+    auto planeCloud = new pcl::PointCloud<PointT>();
+
+    for (auto it : inliers->indices) {
+        planeCloud->points.push_back(cloud->points[it]);
+    }
+
+    // Create the filtering object
+    pcl::ExtractIndices<PointT> extract;
+
+    // Extract the inliers
+    extract.setInputCloud(cloud);
+    extract.setIndices(inliers);
+    extract.setNegative(true);
+    extract.filter(*obstacleCloud);
 
     std::pair<typename pcl::PointCloud<PointT>::Ptr,
               typename pcl::PointCloud<PointT>::Ptr>
-        segResult(cloud, cloud);
+        segResult(obstacleCloud, planeCloud);
+
     return segResult;
 }
 
@@ -59,8 +77,93 @@ std::pair<typename pcl::PointCloud<PointT>::Ptr,
         float distanceThreshold) {
     // Time segmentation process
     auto startTime = std::chrono::steady_clock::now();
-    pcl::PointIndices::Ptr inliers;
-    // TODO:: Fill in this function to find inliers for the cloud.
+
+    // Done:: Fill in this function to find inliers for the cloud.
+    // Create the segmentation object
+    /*pcl::SACSegmentation<PointT> seg;
+    pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients());
+    pcl::PointIndices::Ptr inliers(new pcl::PointIndices());
+
+    seg.setOptimizeCoefficients(true);
+    seg.setModelType(pcl::SACMODEL_PLANE);
+    seg.setMethodType(pcl::SAC_RANSAC);
+    seg.setMaxIterations(maxIterations);
+    seg.setDistanceThreshold(distanceThreshold);
+
+    // Segment the largest planar component from the remaining cloud
+    seg.setInputCloud(cloud);
+    seg.segment(*inliers, *coefficients);
+    if (inliers->indices.size() == 0) {
+        std::cerr << "Could not estimate a planar model for the given dataset."
+                  << std::endl;
+    }*/
+
+    // Implement RANSAC
+
+    pcl::PointIndices::Ptr inliers(new pcl::PointIndices());
+    int randomSampleIndex[3];
+
+    // For max iterations
+    while (maxIterations-- > 0) {
+        // Randomly sample subset and fit plane
+        pcl::PointIndices::Ptr inliersIntermediate(new pcl::PointIndices());
+        int index = 0;
+        while (inliersIntermediate->indices.size() < 3) {
+            randomSampleIndex[index] = rand() % cloud->points.size();
+            inliersIntermediate->indices.push_back(randomSampleIndex[index]);
+            ++index;
+        }
+
+        float x1, y1, z1, x2, y2, z2, x3, y3, z3;
+
+        index = 0;
+        y1 = cloud->points[randomSampleIndex[index]].y;
+        z1 = cloud->points[randomSampleIndex[index]].z;
+        x1 = cloud->points[randomSampleIndex[index]].x;
+        ++index;
+        x2 = cloud->points[randomSampleIndex[index]].x;
+        y2 = cloud->points[randomSampleIndex[index]].y;
+        z2 = cloud->points[randomSampleIndex[index]].z;
+        ++index;
+        x3 = cloud->points[randomSampleIndex[index]].x;
+        y3 = cloud->points[randomSampleIndex[index]].y;
+        z3 = cloud->points[randomSampleIndex[index]].z;
+
+        float a = ((y2 - y1) * (z3 - z1)) - ((z2 - z1) * (y3 - y1));
+        float b = ((z2 - z1) * (x3 - x1)) - ((x2 - x1) * (z3 - z1));
+        float c = ((x2 - x1) * (y3 - y1)) - ((y2 - y1) * (x3 - x1));
+        float d = -((a * x1) + (b * y1) + (c * z1));
+
+        /*
+         * For all x, y, z in point cloud check if it under tolerance
+         * ∣A*x+B*y+C*z+D∣/sqrt(A^2+B^2+C^2)
+         */
+        for (index = 0; index < cloud->points.size(); ++index) {
+            // If the point is one already picked as inlier skip it
+            if (index == randomSampleIndex[0] ||
+                index == randomSampleIndex[1] ||
+                index == randomSampleIndex[2]) {
+                continue;
+            }
+
+            auto point = cloud->points[index];
+
+            // Measure distance between every point and fitted line
+            float distance =
+                fabs((a * point.x) + (b * point.y) + (c * point.z) + d) /
+                sqrt(a * a + b * b + c * c);
+
+            // If distance is smaller than threshold count it as inlier
+            if (distance <= distanceThreshold) {
+                inliersIntermediate->indices.push_back(index);
+            }
+
+            // Set indicies of inliers from fitted line with most inliers
+            if (inliersIntermediate->indices.size() > inliers->indices.size()) {
+                inliers = inliersIntermediate;
+            }
+        }
+    }
 
     auto endTime = std::chrono::steady_clock::now();
     auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(
