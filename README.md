@@ -12,10 +12,16 @@ Segmentation and clustering methods are created from scratch.
 
 ## Installation
 
+### Docker
+
+```bash
+$> docker pull ragumanjegowda/docker:latest
+```
+
 ### Ubuntu 
 
 ```bash
-$> sudo apt install libpcl-dev
+$> sudo apt install libpcl-dev ninja-build cmake
 ```
 
 ### MAC (via Homebrew)
@@ -23,6 +29,7 @@ $> sudo apt install libpcl-dev
 ```bash
 $> brew tap brewsci/science
 $> brew install pcl
+$> brew install ninja cmake
 ```
 
 
@@ -30,7 +37,7 @@ $> brew install pcl
 
 ```bash
 $> mkdir build && cd build
-$> cmake ..
-$> make
+$> cmake -G Ninja ..
+$> ninja -j400
 $> ./environment
 ```
