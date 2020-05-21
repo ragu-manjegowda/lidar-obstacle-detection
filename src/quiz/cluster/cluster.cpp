@@ -72,12 +72,43 @@ void render2DTree(Node* node,
     }
 }
 
+void euclideanClusterHelper(int index,
+                            std::vector<int>& cluster,
+                            std::vector<bool>& visited,
+                            const std::vector<std::vector<float>>& points,
+                            KdTree* tree,
+                            float distanceTol) {
+    if (visited[index] == true) {
+        return;
+    }
+
+    visited[index] = true;
+    cluster.push_back(index);
+
+    std::vector<int> nearestPoints = tree->search(points[index], distanceTol);
+
+    for (auto& it : nearestPoints) {
+        if (!visited[it]) {
+            euclideanClusterHelper(it, cluster, visited, points, tree, distanceTol);
+        }
+    }
+}
+
 std::vector<std::vector<int>> euclideanCluster(
     const std::vector<std::vector<float>>& points, KdTree* tree, float distanceTol) {
 
-    // TODO: Fill out this function to return list of indices for each cluster
+    // Done: Fill out this function to return list of indices for each cluster
 
     std::vector<std::vector<int>> clusters;
+    std::vector<bool> visited(points.size(), false);
+
+    for (int i = 0; i < points.size(); i++) {
+        if (visited[i] == false) {
+            std::vector<int> cluster;
+            euclideanClusterHelper(i, cluster, visited, points, tree, distanceTol);
+            clusters.push_back(cluster);
+        }
+    }
 
     return clusters;
 }
@@ -96,8 +127,9 @@ int main() {
 
     // Create data
     std::vector<std::vector<float>> points = {
-        {-6.2, 7},  {-6.3, 8.4}, {-5.2, 7.1}, {-5.7, 6.3},  {7.2, 6.1}, {8.0, 5.3},
-        {7.2, 7.1}, {0.2, -7.1}, {1.7, -6.9}, {-1.2, -7.2}, {2.2, -8.9}};
+        {-6.2, 7, 1.0},   {-6.3, 8.4, 0.5},  {-5.2, 7.1, 0.8}, {-5.7, 6.3, 1.2},
+        {7.2, 6.1, 0.4},  {8.0, 5.3, 0.3},   {7.2, 7.1, 0.6},  {0.2, -7.1, 0.9},
+        {1.7, -6.9, 0.7}, {-1.2, -7.2, 0.1}, {2.2, -8.9, 0.0}};
     // std::vector<std::vector<float>> points = { {-6.2,7}, {-6.3,8.4},
     // {-5.2,7.1}, {-5.7,6.3} };
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = CreateData(points);
@@ -127,15 +159,17 @@ int main() {
 
     // Render clusters
     int clusterId = 0;
-    std::vector<Color> colors = {Color(1, 0, 0), Color(0, 1, 0), Color(0, 0, 1)};
+    std::vector<Color> colors = {Color(1, 0, 0), Color(0, 1, 0), Color(0, 0, 1),
+                                 Color(0, 1, 1)};
     for (std::vector<int> cluster : clusters) {
+        std::cout << "cluster Size = " << cluster.size() << "\n";
         pcl::PointCloud<pcl::PointXYZ>::Ptr clusterCloud(
             new pcl::PointCloud<pcl::PointXYZ>());
         for (int indice : cluster)
             clusterCloud->points.push_back(
                 pcl::PointXYZ(points[indice][0], points[indice][1], 0));
         renderPointCloud(viewer, clusterCloud, "cluster" + std::to_string(clusterId),
-                         colors[clusterId % 3]);
+                         colors[clusterId % 4]);
         ++clusterId;
     }
     if (clusters.size() == 0) renderPointCloud(viewer, cloud, "data");
