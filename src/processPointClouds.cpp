@@ -13,15 +13,16 @@ template <typename PointT>
 ProcessPointClouds<PointT>::~ProcessPointClouds() {}
 
 template <typename PointT>
-void ProcessPointClouds<PointT>::numPoints(
-    typename pcl::PointCloud<PointT>::Ptr cloud) {
+void ProcessPointClouds<PointT>::numPoints(typename pcl::PointCloud<PointT>::Ptr cloud) {
     std::cout << cloud->points.size() << std::endl;
 }
 
 template <typename PointT>
 typename pcl::PointCloud<PointT>::Ptr ProcessPointClouds<PointT>::FilterCloud(
-    typename pcl::PointCloud<PointT>::Ptr cloud, float filterRes,
-    Eigen::Vector4f minPoint, Eigen::Vector4f maxPoint) {
+    typename pcl::PointCloud<PointT>::Ptr cloud,
+    float filterRes,
+    Eigen::Vector4f minPoint,
+    Eigen::Vector4f maxPoint) {
 
     // Time segmentation process
     auto startTime = std::chrono::steady_clock::now();
@@ -30,20 +31,17 @@ typename pcl::PointCloud<PointT>::Ptr ProcessPointClouds<PointT>::FilterCloud(
     // based filtering
 
     auto endTime = std::chrono::steady_clock::now();
-    auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-        endTime - startTime);
-    std::cout << "filtering took " << elapsedTime.count() << " milliseconds"
-              << std::endl;
+    auto elapsedTime =
+        std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+    std::cout << "filtering took " << elapsedTime.count() << " milliseconds" << std::endl;
 
     return cloud;
 }
 
 template <typename PointT>
-std::pair<typename pcl::PointCloud<PointT>::Ptr,
-          typename pcl::PointCloud<PointT>::Ptr>
+std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr>
     ProcessPointClouds<PointT>::SeparateClouds(
-        pcl::PointIndices::Ptr inliers,
-        typename pcl::PointCloud<PointT>::Ptr cloud) {
+        pcl::PointIndices::Ptr inliers, typename pcl::PointCloud<PointT>::Ptr cloud) {
     // Done: Create two new point clouds, one cloud with obstacles and other
     // with segmented plane
     auto obstacleCloud = new pcl::PointCloud<PointT>();
@@ -70,10 +68,9 @@ std::pair<typename pcl::PointCloud<PointT>::Ptr,
 }
 
 template <typename PointT>
-std::pair<typename pcl::PointCloud<PointT>::Ptr,
-          typename pcl::PointCloud<PointT>::Ptr>
-    ProcessPointClouds<PointT>::SegmentPlane(
-        typename pcl::PointCloud<PointT>::Ptr cloud, int maxIterations,
+std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr>
+    ProcessPointClouds<PointT>::SegmentPlane(typename pcl::PointCloud<PointT>::Ptr cloud,
+                                             int maxIterations,
         float distanceThreshold) {
     // Time segmentation process
     auto startTime = std::chrono::steady_clock::now();
@@ -140,8 +137,7 @@ std::pair<typename pcl::PointCloud<PointT>::Ptr,
          */
         for (index = 0; index < cloud->points.size(); ++index) {
             // If the point is one already picked as inlier skip it
-            if (index == randomSampleIndex[0] ||
-                index == randomSampleIndex[1] ||
+            if (index == randomSampleIndex[0] || index == randomSampleIndex[1] ||
                 index == randomSampleIndex[2]) {
                 continue;
             }
@@ -149,8 +145,7 @@ std::pair<typename pcl::PointCloud<PointT>::Ptr,
             auto point = cloud->points[index];
 
             // Measure distance between every point and fitted line
-            float distance =
-                fabs((a * point.x) + (b * point.y) + (c * point.z) + d) /
+            float distance = fabs((a * point.x) + (b * point.y) + (c * point.z) + d) /
                 sqrt(a * a + b * b + c * c);
 
             // If distance is smaller than threshold count it as inlier
@@ -166,10 +161,10 @@ std::pair<typename pcl::PointCloud<PointT>::Ptr,
     }
 
     auto endTime = std::chrono::steady_clock::now();
-    auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-        endTime - startTime);
-    std::cout << "plane segmentation took " << elapsedTime.count()
-              << " milliseconds" << std::endl;
+    auto elapsedTime =
+        std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+    std::cout << "plane segmentation took " << elapsedTime.count() << " milliseconds"
+              << std::endl;
 
     std::pair<typename pcl::PointCloud<PointT>::Ptr,
               typename pcl::PointCloud<PointT>::Ptr>
@@ -178,10 +173,11 @@ std::pair<typename pcl::PointCloud<PointT>::Ptr,
 }
 
 template <typename PointT>
-std::vector<typename pcl::PointCloud<PointT>::Ptr>
-    ProcessPointClouds<PointT>::Clustering(
-        typename pcl::PointCloud<PointT>::Ptr cloud, float clusterTolerance,
-        int minSize, int maxSize) {
+std::vector<typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::Clustering(
+    typename pcl::PointCloud<PointT>::Ptr cloud,
+    float clusterTolerance,
+    int minSize,
+    int maxSize) {
 
     // Time clustering process
     auto startTime = std::chrono::steady_clock::now();
@@ -192,11 +188,10 @@ std::vector<typename pcl::PointCloud<PointT>::Ptr>
     // detected obstacles
 
     auto endTime = std::chrono::steady_clock::now();
-    auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-        endTime - startTime);
-    std::cout << "clustering took " << elapsedTime.count()
-              << " milliseconds and found " << clusters.size() << " clusters"
-              << std::endl;
+    auto elapsedTime =
+        std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+    std::cout << "clustering took " << elapsedTime.count() << " milliseconds and found "
+              << clusters.size() << " clusters" << std::endl;
 
     return clusters;
 }
@@ -221,8 +216,8 @@ Box ProcessPointClouds<PointT>::BoundingBox(
 }
 
 template <typename PointT>
-void ProcessPointClouds<PointT>::savePcd(
-    typename pcl::PointCloud<PointT>::Ptr cloud, std::string file) {
+void ProcessPointClouds<PointT>::savePcd(typename pcl::PointCloud<PointT>::Ptr cloud,
+                                         std::string file) {
     pcl::io::savePCDFileASCII(file, *cloud);
     std::cerr << "Saved " << cloud->points.size() << " data points to " + file
               << std::endl;
@@ -238,8 +233,8 @@ typename pcl::PointCloud<PointT>::Ptr ProcessPointClouds<PointT>::loadPcd(
     {
         PCL_ERROR("Couldn't read file \n");
     }
-    std::cerr << "Loaded " << cloud->points.size()
-              << " data points from " + file << std::endl;
+    std::cerr << "Loaded " << cloud->points.size() << " data points from " + file
+              << std::endl;
 
     return cloud;
 }

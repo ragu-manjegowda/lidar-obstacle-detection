@@ -24,7 +24,9 @@ struct Ray {
     // stright up resoultion: the magnitude of the ray's step, used for ray
     // casting, the smaller the more accurate but the more expensive
 
-    Ray(Vect3 setOrigin, double horizontalAngle, double verticalAngle,
+    Ray(Vect3 setOrigin,
+        double horizontalAngle,
+        double verticalAngle,
         double setResolution)
         : origin(setOrigin)
         , resolution(setResolution)
@@ -34,9 +36,12 @@ struct Ray {
         , castPosition(origin)
         , castDistance(0) {}
 
-    void rayCast(const std::vector<Car>& cars, double minDistance,
-                 double maxDistance, pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,
-                 double slopeAngle, double sderr) {
+    void rayCast(const std::vector<Car>& cars,
+                 double minDistance,
+                 double maxDistance,
+                 pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,
+                 double slopeAngle,
+                 double sderr) {
         // reset ray
         castPosition = origin;
         castDistance = 0;
@@ -108,8 +113,7 @@ struct Lidar {
         for (double angleVertical = steepestAngle;
              angleVertical < steepestAngle + angleRange;
              angleVertical += angleIncrement) {
-            for (double angle = 0; angle <= 2 * pi;
-                 angle += horizontalAngleInc) {
+            for (double angle = 0; angle <= 2 * pi; angle += horizontalAngleInc) {
                 Ray ray(position, angle, angleVertical, resoultion);
                 rays.push_back(ray);
             }
@@ -125,14 +129,11 @@ struct Lidar {
         cloud->points.clear();
         auto startTime = std::chrono::steady_clock::now();
         for (Ray ray : rays)
-            ray.rayCast(cars, minDistance, maxDistance, cloud, groundSlope,
-                        sderr);
+            ray.rayCast(cars, minDistance, maxDistance, cloud, groundSlope, sderr);
         auto endTime = std::chrono::steady_clock::now();
         auto elapsedTime =
-            std::chrono::duration_cast<std::chrono::milliseconds>(endTime -
-                                                                  startTime);
-        cout << "ray casting took " << elapsedTime.count() << " milliseconds"
-             << endl;
+            std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+        cout << "ray casting took " << elapsedTime.count() << " milliseconds" << endl;
         cloud->width = cloud->points.size();
         cloud->height = 1;  // one dimensional unorganized point cloud dataset
         return cloud;

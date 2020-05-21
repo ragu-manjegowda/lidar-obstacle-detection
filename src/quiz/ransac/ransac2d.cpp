@@ -8,8 +8,7 @@
 #include "../../processPointClouds.cpp"
 
 pcl::PointCloud<pcl::PointXYZ>::Ptr CreateData() {
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(
-        new pcl::PointCloud<pcl::PointXYZ>());
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>());
     // Add inliers
     float scatter = 0.6;
     for (int i = -5; i < 5; i++) {
@@ -42,8 +41,7 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr CreateData() {
 
 pcl::PointCloud<pcl::PointXYZ>::Ptr CreateData3D() {
     ProcessPointClouds<pcl::PointXYZ> pointProcessor;
-    return pointProcessor.loadPcd(
-        "../../../sensors/data/pcd/simpleHighway.pcd");
+    return pointProcessor.loadPcd("../../../sensors/data/pcd/simpleHighway.pcd");
 }
 
 pcl::visualization::PCLVisualizer::Ptr initScene() {
@@ -57,7 +55,8 @@ pcl::visualization::PCLVisualizer::Ptr initScene() {
 }
 
 std::unordered_set<int> Ransac(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
-                               int maxIterations, float distanceTol) {
+                               int maxIterations,
+                               float distanceTol) {
     std::unordered_set<int> inliersResult;
     srand(time(NULL));
 
@@ -105,9 +104,8 @@ std::unordered_set<int> Ransac(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
             auto point = cloud->points[index];
 
             // Measure distance between every point and fitted line
-            float distance =
-                fabs((a * point.x) + (b * point.y) + (c * point.z) + d) /
-                sqrt(a * a + b * b + c * c);
+            float distance = fabs((a * point.x) + (b * point.y) + (c * point.z) + d) /
+                             sqrt(a * a + b * b + c * c);
 
             // If distance is smaller than threshold count it as inlier
             if (distance <= distanceTol) {
