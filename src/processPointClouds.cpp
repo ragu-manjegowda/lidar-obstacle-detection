@@ -34,15 +34,60 @@ typename pcl::PointCloud<PointT>::Ptr ProcessPointClouds<PointT>::FilterCloud(
     // Time segmentation process
     auto startTime = std::chrono::steady_clock::now();
 
-    // TODO:: Fill in the function to do voxel grid point reduction and region
+    // Done:: Fill in the function to do voxel grid point reduction and region
     // based filtering
+
+    typename pcl::PointCloud<PointT>::Ptr cloud_filtered(new pcl::PointCloud<PointT>);
+
+    /*
+     * Voxel filtering. Reference
+     * https://pcl-tutorials.readthedocs.io/en/latest/voxel_grid.html?highlight=voxel
+     */
+    // Create the filtering object
+    pcl::VoxelGrid<PointT> vg;
+    vg.setInputCloud(cloud);
+    vg.setLeafSize(filterRes, filterRes, filterRes);
+    vg.filter(*cloud_filtered);
+
+    /*
+     * CropBox. Reference
+     * https://pointclouds.org/documentation/classpcl_1_1_crop_box_3_01pcl_1_1_p_c_l_point_cloud2_01_4.html
+     */
+    typename pcl::PointCloud<PointT>::Ptr cloud_roi(new pcl::PointCloud<PointT>);
+    pcl::CropBox<PointT> roi(true);
+    roi.setMin(minPoint);
+    roi.setMax(maxPoint);
+    roi.setInputCloud(cloud_filtered);
+    roi.filter(*cloud_roi);
+
+    // Remove points hitting roof
+    std::vector<int> indices;
+    pcl::CropBox<PointT> roof(true);
+    roof.setMin(Eigen::Vector4f(-1.5, -1.7, -1, 1));
+    roof.setMax(Eigen::Vector4f(2.6, 1.7, -0.4, 1));
+    roof.setInputCloud(cloud_roi);
+    roof.filter(indices);
+
+    // Create the filtering object
+    pcl::PointIndices::Ptr inliers(new pcl::PointIndices);
+    for (auto point : indices)
+    {
+        inliers->indices.push_back(point);
+    }
+
+    // Extract the inliers
+    pcl::ExtractIndices<PointT> extract;
+    extract.setInputCloud(cloud_roi);
+    extract.setIndices(inliers);
+    extract.setNegative(true);
+    extract.filter(*cloud_roi);
 
     auto endTime = std::chrono::steady_clock::now();
     auto elapsedTime =
         std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
     std::cout << "filtering took " << elapsedTime.count() << " milliseconds" << std::endl;
 
-    return cloud;
+    return cloud_roi;
 }
 
 template <typename PointT>
