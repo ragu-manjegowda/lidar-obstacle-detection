@@ -160,7 +160,7 @@ std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT
 
             // Measure distance between every point and fitted line
             float distance = fabs((a * point.x) + (b * point.y) + (c * point.z) + d) /
-                sqrt(a * a + b * b + c * c);
+                             sqrt(a * a + b * b + c * c);
 
             // If distance is smaller than threshold count it as inlier
             if (distance <= distanceThreshold)
@@ -338,6 +338,60 @@ Box ProcessPointClouds<PointT>::BoundingBox(typename pcl::PointCloud<PointT>::Pt
     box.z_max = maxPoint.z;
 
     return box;
+}
+
+template <typename PointT>
+BoxQ ProcessPointClouds<PointT>::BoundingBoxQ(
+    typename pcl::PointCloud<PointT>::Ptr cluster)
+{
+    // Project the cluster onto the XY plane
+    typename pcl::PointCloud<pcl::PointXYZ>::Ptr clusterXYProjection(
+        new pcl::PointCloud<pcl::PointXYZ>);
+
+    for (PointT point : cluster->points)
+    {
+        clusterXYProjection->points.push_back(pcl::PointXYZ(point.x, point.y, 0));
+    }
+
+    /*
+     * Reference -
+     * http://codextechnicanum.blogspot.com/2015/04/find-minimum-oriented-bounding-box-of.html
+     */
+    Eigen::Vector4f pcaCentroid;
+    pcl::compute3DCentroid(*clusterXYProjection, pcaCentroid);
+    Eigen::Matrix3f covariance;
+    computeCovarianceMatrixNormalized(*clusterXYProjection, pcaCentroid, covariance);
+
+    Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> eigen_solver(
+        covariance, Eigen::ComputeEigenvectors);
+    Eigen::Matrix3f eigenVectorsPCA = eigen_solver.eigenvectors();
+    eigenVectorsPCA.col(2) = eigenVectorsPCA.col(0).cross(eigenVectorsPCA.col(1));
+
+    Eigen::Matrix4f projectionTransform(Eigen::Matrix4f::Identity());
+    projectionTransform.block<3, 3>(0, 0) = eigenVectorsPCA.transpose();
+    projectionTransform.block<3, 1>(0, 3) =
+        -1.f * (projectionTransform.block<3, 3>(0, 0) * pcaCentroid.head<3>());
+
+    typename pcl::PointCloud<PointT>::Ptr cloudPointsProjected(
+        new pcl::PointCloud<PointT>);
+    pcl::transformPointCloud(*cluster, *cloudPointsProjected, projectionTransform);
+
+    PointT minPoint, maxPoint;
+    pcl::getMinMax3D(*cloudPointsProjected, minPoint, maxPoint);
+
+    const Eigen::Vector3f meanDiagonal =
+        0.5f * (maxPoint.getVector3fMap() + minPoint.getVector3fMap());
+
+    BoxQ boxQ;
+
+    boxQ.bboxQuaternion = eigenVectorsPCA;
+    boxQ.bboxTransform = eigenVectorsPCA * meanDiagonal + pcaCentroid.head<3>();
+
+    boxQ.cube_length = maxPoint.x - minPoint.x;
+    boxQ.cube_width = maxPoint.y - minPoint.y;
+    boxQ.cube_height = maxPoint.z - minPoint.z;
+
+    return boxQ;
 }
 
 template <typename PointT>
