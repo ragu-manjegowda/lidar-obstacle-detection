@@ -4,7 +4,8 @@
 
 #include "render.h"
 
-void renderHighway(pcl::visualization::PCLVisualizer::Ptr& viewer) {
+void renderHighway(pcl::visualization::PCLVisualizer::Ptr& viewer)
+{
 
     // units in meters
     double roadLength = 50.0;
@@ -30,17 +31,21 @@ void renderHighway(pcl::visualization::PCLVisualizer::Ptr& viewer) {
 int countRays = 0;
 void renderRays(pcl::visualization::PCLVisualizer::Ptr& viewer,
                 const Vect3& origin,
-                const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud) {
+                const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
+{
 
-    for (pcl::PointXYZ point : cloud->points) {
+    for (pcl::PointXYZ point : cloud->points)
+    {
         viewer->addLine(pcl::PointXYZ(origin.x, origin.y, origin.z), point, 1, 0, 0,
                         "ray" + std::to_string(countRays));
         countRays++;
     }
 }
 
-void clearRays(pcl::visualization::PCLVisualizer::Ptr& viewer) {
-    while (countRays) {
+void clearRays(pcl::visualization::PCLVisualizer::Ptr& viewer)
+{
+    while (countRays)
+    {
         countRays--;
         viewer->removeShape("ray" + std::to_string(countRays));
     }
@@ -49,7 +54,8 @@ void clearRays(pcl::visualization::PCLVisualizer::Ptr& viewer) {
 void renderPointCloud(pcl::visualization::PCLVisualizer::Ptr& viewer,
                       const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,
                       std::string name,
-                      Color color) {
+                      Color color)
+{
 
     viewer->addPointCloud<pcl::PointXYZ>(cloud, name);
     viewer->setPointCloudRenderingProperties(
@@ -61,14 +67,18 @@ void renderPointCloud(pcl::visualization::PCLVisualizer::Ptr& viewer,
 void renderPointCloud(pcl::visualization::PCLVisualizer::Ptr& viewer,
                       const pcl::PointCloud<pcl::PointXYZI>::Ptr& cloud,
                       std::string name,
-                      Color color) {
+                      Color color)
+{
 
-    if (color.r == -1) {
+    if (color.r == -1)
+    {
         // Select color based off of cloud intensity
         pcl::visualization::PointCloudColorHandlerGenericField<pcl::PointXYZI>
             intensity_distribution(cloud, "intensity");
         viewer->addPointCloud<pcl::PointXYZI>(cloud, intensity_distribution, name);
-    } else {
+    }
+    else
+    {
         // Select color based off input value
         viewer->addPointCloud<pcl::PointXYZI>(cloud, name);
         viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_COLOR,
@@ -84,7 +94,8 @@ void renderBox(pcl::visualization::PCLVisualizer::Ptr& viewer,
                Box box,
                int id,
                Color color,
-               float opacity) {
+               float opacity)
+{
     if (opacity > 1.0) opacity = 1.0;
     if (opacity < 0.0) opacity = 0.0;
 
@@ -119,7 +130,8 @@ void renderBox(pcl::visualization::PCLVisualizer::Ptr& viewer,
                BoxQ box,
                int id,
                Color color,
-               float opacity) {
+               float opacity)
+{
     if (opacity > 1.0) opacity = 1.0;
     if (opacity < 0.0) opacity = 0.0;
 

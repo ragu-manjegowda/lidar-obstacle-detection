@@ -10,7 +10,8 @@
 #include "processPointClouds.cpp"
 
 std::vector<Car> initHighway(bool renderScene,
-                             pcl::visualization::PCLVisualizer::Ptr& viewer) {
+                             pcl::visualization::PCLVisualizer::Ptr& viewer)
+{
 
     Car egoCar(Vect3(0, 0, 0), Vect3(4, 2, 2), Color(0, 1, 0), "egoCar");
     Car car1(Vect3(15, 0, 0), Vect3(4, 2, 2), Color(0, 0, 1), "car1");
@@ -23,7 +24,8 @@ std::vector<Car> initHighway(bool renderScene,
     cars.push_back(car2);
     cars.push_back(car3);
 
-    if (renderScene) {
+    if (renderScene)
+    {
         renderHighway(viewer);
         egoCar.render(viewer);
         car1.render(viewer);
@@ -34,7 +36,8 @@ std::vector<Car> initHighway(bool renderScene,
     return cars;
 }
 
-void simpleHighway(pcl::visualization::PCLVisualizer::Ptr& viewer) {
+void simpleHighway(pcl::visualization::PCLVisualizer::Ptr& viewer)
+{
     // ----------------------------------------------------
     // -----Open 3D viewer and display simple highway -----
     // ----------------------------------------------------
@@ -58,7 +61,8 @@ void simpleHighway(pcl::visualization::PCLVisualizer::Ptr& viewer) {
 }
 
 // setAngle: SWITCH CAMERA ANGLE {XY, TopDown, Side, FPS}
-void initCamera(CameraAngle setAngle, pcl::visualization::PCLVisualizer::Ptr& viewer) {
+void initCamera(CameraAngle setAngle, pcl::visualization::PCLVisualizer::Ptr& viewer)
+{
 
     viewer->setBackgroundColor(0, 0, 0);
 
@@ -67,7 +71,8 @@ void initCamera(CameraAngle setAngle, pcl::visualization::PCLVisualizer::Ptr& vi
     // distance away in meters
     int distance = 16;
 
-    switch (setAngle) {
+    switch (setAngle)
+    {
         case XY:
             viewer->setCameraPosition(-distance, -distance, distance, 1, 1, 0);
             break;
@@ -84,7 +89,8 @@ void initCamera(CameraAngle setAngle, pcl::visualization::PCLVisualizer::Ptr& vi
     if (setAngle != FPS) viewer->addCoordinateSystem(1.0);
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
     std::cout << "starting enviroment" << std::endl;
 
     pcl::visualization::PCLVisualizer::Ptr viewer(
@@ -93,7 +99,8 @@ int main(int argc, char** argv) {
     initCamera(setAngle, viewer);
     simpleHighway(viewer);
 
-    while (!viewer->wasStopped()) {
+    while (!viewer->wasStopped())
+    {
         viewer->spinOnce();
     }
 }

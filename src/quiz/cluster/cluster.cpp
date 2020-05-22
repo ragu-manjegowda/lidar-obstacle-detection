@@ -10,7 +10,8 @@
 // Arguments:
 // window is the region to draw box around
 // increase zoom to see more of the area
-pcl::visualization::PCLVisualizer::Ptr initScene(Box window, int zoom) {
+pcl::visualization::PCLVisualizer::Ptr initScene(Box window, int zoom)
+{
     pcl::visualization::PCLVisualizer::Ptr viewer(
         new pcl::visualization::PCLVisualizer("2D Viewer"));
     viewer->setBackgroundColor(0, 0, 0);
@@ -23,10 +24,12 @@ pcl::visualization::PCLVisualizer::Ptr initScene(Box window, int zoom) {
     return viewer;
 }
 
-pcl::PointCloud<pcl::PointXYZ>::Ptr CreateData(std::vector<std::vector<float>> points) {
+pcl::PointCloud<pcl::PointXYZ>::Ptr CreateData(std::vector<std::vector<float>> points)
+{
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>());
 
-    for (int i = 0; i < points.size(); i++) {
+    for (int i = 0; i < points.size(); i++)
+    {
         pcl::PointXYZ point;
         point.x = points[i][0];
         point.y = points[i][1];
@@ -44,13 +47,16 @@ void render2DTree(Node* node,
                   pcl::visualization::PCLVisualizer::Ptr& viewer,
                   Box window,
                   int& iteration,
-                  uint depth = 0) {
+                  uint depth = 0)
+{
 
-    if (node != NULL) {
+    if (node != NULL)
+    {
         Box upperWindow = window;
         Box lowerWindow = window;
         // split on x axis
-        if (depth % 2 == 0) {
+        if (depth % 2 == 0)
+        {
             viewer->addLine(pcl::PointXYZ(node->point[0], window.y_min, 0),
                             pcl::PointXYZ(node->point[0], window.y_max, 0), 0, 0, 1,
                             "line" + std::to_string(iteration));
@@ -58,7 +64,8 @@ void render2DTree(Node* node,
             upperWindow.x_min = node->point[0];
         }
         // split on y axis
-        else {
+        else
+        {
             viewer->addLine(pcl::PointXYZ(window.x_min, node->point[1], 0),
                             pcl::PointXYZ(window.x_max, node->point[1], 0), 1, 0, 0,
                             "line" + std::to_string(iteration));
@@ -77,8 +84,10 @@ void euclideanClusterHelper(int index,
                             std::vector<bool>& visited,
                             const std::vector<std::vector<float>>& points,
                             KdTree* tree,
-                            float distanceTol) {
-    if (visited[index] == true) {
+                            float distanceTol)
+{
+    if (visited[index] == true)
+    {
         return;
     }
 
@@ -87,23 +96,28 @@ void euclideanClusterHelper(int index,
 
     std::vector<int> nearestPoints = tree->search(points[index], distanceTol);
 
-    for (auto& it : nearestPoints) {
-        if (!visited[it]) {
+    for (auto& it : nearestPoints)
+    {
+        if (!visited[it])
+        {
             euclideanClusterHelper(it, cluster, visited, points, tree, distanceTol);
         }
     }
 }
 
 std::vector<std::vector<int>> euclideanCluster(
-    const std::vector<std::vector<float>>& points, KdTree* tree, float distanceTol) {
+    const std::vector<std::vector<float>>& points, KdTree* tree, float distanceTol)
+{
 
     // Done: Fill out this function to return list of indices for each cluster
 
     std::vector<std::vector<int>> clusters;
     std::vector<bool> visited(points.size(), false);
 
-    for (int i = 0; i < points.size(); i++) {
-        if (visited[i] == false) {
+    for (int i = 0; i < points.size(); i++)
+    {
+        if (visited[i] == false)
+        {
             std::vector<int> cluster;
             euclideanClusterHelper(i, cluster, visited, points, tree, distanceTol);
             clusters.push_back(cluster);
@@ -113,7 +127,8 @@ std::vector<std::vector<int>> euclideanCluster(
     return clusters;
 }
 
-int main() {
+int main()
+{
 
     // Create viewer
     Box window;
@@ -161,7 +176,8 @@ int main() {
     int clusterId = 0;
     std::vector<Color> colors = {Color(1, 0, 0), Color(0, 1, 0), Color(0, 0, 1),
                                  Color(0, 1, 1)};
-    for (std::vector<int> cluster : clusters) {
+    for (std::vector<int> cluster : clusters)
+    {
         std::cout << "cluster Size = " << cluster.size() << "\n";
         pcl::PointCloud<pcl::PointXYZ>::Ptr clusterCloud(
             new pcl::PointCloud<pcl::PointXYZ>());
@@ -174,7 +190,8 @@ int main() {
     }
     if (clusters.size() == 0) renderPointCloud(viewer, cloud, "data");
 
-    while (!viewer->wasStopped()) {
+    while (!viewer->wasStopped())
+    {
         viewer->spinOnce();
     }
 }

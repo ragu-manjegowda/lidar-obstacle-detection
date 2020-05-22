@@ -20,7 +20,8 @@
 #include <vector>
 
 template <typename PointT>
-class ProcessPointClouds {
+class ProcessPointClouds
+{
    public:
     // constructor
     ProcessPointClouds();

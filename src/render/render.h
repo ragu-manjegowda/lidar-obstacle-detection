@@ -10,28 +10,38 @@
 #include <string>
 #include <vector>
 
-struct Color {
+struct Color
+{
 
     float r, g, b;
 
     Color(float setR, float setG, float setB) : r(setR), g(setG), b(setB) {}
 };
 
-struct Vect3 {
+struct Vect3
+{
 
     double x, y, z;
 
     Vect3(double setX, double setY, double setZ) : x(setX), y(setY), z(setZ) {}
 
-    Vect3 operator+(const Vect3& vec) {
+    Vect3 operator+(const Vect3& vec)
+    {
         Vect3 result(x + vec.x, y + vec.y, z + vec.z);
         return result;
     }
 };
 
-enum CameraAngle { XY, TopDown, Side, FPS };
+enum CameraAngle
+{
+    XY,
+    TopDown,
+    Side,
+    FPS
+};
 
-struct Car {
+struct Car
+{
 
     // units in meters
     Vect3 position, dimensions;
@@ -40,12 +50,12 @@ struct Car {
     Color color;
 
     Car(Vect3 setPosition, Vect3 setDimensions, Color setColor, std::string setName)
-        : position(setPosition)
-        , dimensions(setDimensions)
-        , color(setColor)
-        , name(setName) {}
+        : position(setPosition), dimensions(setDimensions), color(setColor), name(setName)
+    {
+    }
 
-    void render(pcl::visualization::PCLVisualizer::Ptr& viewer) {
+    void render(pcl::visualization::PCLVisualizer::Ptr& viewer)
+    {
         // render bottom of car
         viewer->addCube(position.x - dimensions.x / 2, position.x + dimensions.x / 2,
                         position.y - dimensions.y / 2, position.y + dimensions.y / 2,
@@ -73,11 +83,13 @@ struct Car {
     }
 
     // collision helper function
-    bool inbetween(double point, double center, double range) {
+    bool inbetween(double point, double center, double range)
+    {
         return (center - range <= point) && (center + range >= point);
     }
 
-    bool checkCollision(Vect3 point) {
+    bool checkCollision(Vect3 point)
+    {
         return (inbetween(point.x, position.x, dimensions.x / 2) &&
                 inbetween(point.y, position.y, dimensions.y / 2) &&
                 inbetween(point.z, position.z + dimensions.z / 3, dimensions.z / 3)) ||
