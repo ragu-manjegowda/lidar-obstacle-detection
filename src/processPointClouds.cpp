@@ -97,8 +97,8 @@ std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT
 {
     // Done: Create two new point clouds, one cloud with obstacles and other
     // with segmented plane
-    auto obstacleCloud = new pcl::PointCloud<PointT>();
-    auto planeCloud = new pcl::PointCloud<PointT>();
+    typename pcl::PointCloud<PointT>::Ptr obstacleCloud(new pcl::PointCloud<PointT>);
+    typename pcl::PointCloud<PointT>::Ptr planeCloud(new pcl::PointCloud<PointT>);
 
     for (auto it : inliers->indices)
     {
