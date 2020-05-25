@@ -100,7 +100,8 @@ $> docker pull ragumanjegowda/docker:latest
 ### Ubuntu 
 
 ```bash
-$> sudo apt install libpcl-dev ninja-build cmake
+$> # I have not tested on host Ubuntu, this worked with my DockerImage 
+$> sudo apt install libproj-dev libpcl-dev ninja-build cmake
 ```
 
 ### MAC (via Homebrew)
