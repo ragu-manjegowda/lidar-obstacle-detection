@@ -1,6 +1,6 @@
 # lidar-obstacle-detection
 
-<img src="man/figures/ObstacleDetectionFPS.gif" width="700" height="400" />
+<img src="man/figures/cyclist.gif" width="700" height="400" />
 
 <img src="man/figures/pipeline.png" width="700" height="400" />
 
@@ -85,8 +85,19 @@ shown below
 Finally plumbing everything in the pipeline we have the following image which detects 
 obstacles (vehicles, pole, pedestrians) in the ROI.
 
+There are two things involved here which needs to be considered.
+
+1. Detecting vehicles (objects with bigger ROI)
+
+For detecting vehicles we need to tune the tweak the clustering parameters such that points less than certain threshold are discarded, we need to also increase the distance threshold so that points with larger distance (front and back of vehicle) is not discarded.
+
+2. Detecting pedestrians, poles etcc., (objects with smaller ROI)
+
+For detecting objects with smaller ROI we need to crop all clusters that has more number of points more than certain threshold also we can notice that points of such objects are closer.
+
 <img src="man/figures/pipeline.png" width="700" height="400" />
 
+<img src="man/figures/ObstacleDetectionFPS.gif" width="700" height="400" />
 
 ## Installation
 
@@ -120,3 +131,7 @@ $> cmake -G Ninja ..
 $> ninja -j400
 $> ./environment
 ```
+
+## Credits
+
+Based on Udacity's [SFND_Lidar_Obstacle_Detection](https://github.com/udacity/SFND_Lidar_Obstacle_Detection)
